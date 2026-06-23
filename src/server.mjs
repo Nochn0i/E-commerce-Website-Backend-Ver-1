@@ -1,23 +1,23 @@
-import 'dotenv/config'
-import connect_db from './config/connect_db.mjs'
-import __config, { validate_config } from './config/config.mjs'
-import { startServer, loadAPIRouter, finalize } from './app.mjs'
+import "dotenv/config";
+import __config, { validate_config } from "./config/config.mjs";
+import { connect } from "./config/database.mjs";
+import { startApp } from "./app.mjs";
+import API_ROUTER from "./router/apiRouter.mjs";
+import { server } from "./utils/log.utils.mjs";
 
 (async () => {
-	try {
-		await validate_config()
-		await connect_db(
-			__config.MONGOURI,
-			__config.DBNAME,
-			__config.DBST,
-			__config.DBSCT,
-		)
-		finalize()
-		startServer()
-	} catch (error) {
-		console.log('[ server ] Internal Server Error!')
-		console.error('[ server ] Error:', error)
-		process.exit(1)
-	}
-})()
-		 
+  console.clear();
+  try {
+    server.loading("Starting Server...");
+    await validate_config();
+    await connect(__config.MONGOURI);
+
+    await startApp(__config.PORT, API_ROUTER);
+
+    server.loading("Server was started successfully...");
+  } catch (error) {
+    server.error("Error Encountered while starting server. ERR:", error);
+
+    process.exit(1);
+  }
+})();

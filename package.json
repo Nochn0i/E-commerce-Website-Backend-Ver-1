@@ -4,7 +4,9 @@
   "description": "Version 1 of E-commerce Website",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.mjs",
+    "dev": "node --watch src/server.mjs"
   },
   "repository": {
     "type": "git",
@@ -20,6 +22,7 @@
   "homepage": "https://github.com/Nochn0i/E-commerce-Website-Backend-Ver-1#readme",
   "dependencies": {
     "bcrypt": "^6.0.0",
+    "chalk": "^5.6.2",
     "cors": "^2.8.6",
     "dotenv": "^17.4.2",
     "express": "^5.2.1",
