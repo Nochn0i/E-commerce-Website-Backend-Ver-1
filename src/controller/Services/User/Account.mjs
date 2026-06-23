@@ -20,3 +20,5 @@ export async function createAccount(username, email, password) {
     password: hashedPassword,
   });
 }
+
+export const getAllUsers = async () => await UserAccount.find({});

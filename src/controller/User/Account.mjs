@@ -17,6 +17,21 @@ async function register(req, res, next) {
   }
 }
 
+async function getAllUsers(req, res, next) {
+  try {
+    const users = await User.get_all_users();
+    web.default("Fetched All Users.");
+    return res.status(200).json({
+      message: "All user accounts fetched successfully.",
+      users,
+    });
+  } catch (error) {
+    web.error("User accounts fetch failed.");
+    next(error);
+  }
+}
+
 export default class Account {
   static register = register;
+  static fetchAll = getAllUsers;
 }

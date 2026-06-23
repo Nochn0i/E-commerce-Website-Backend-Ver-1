@@ -1,5 +1,6 @@
-import { createAccount } from "./User/Account.mjs";
+import { createAccount, getAllUsers } from "./User/Account.mjs";
 
 export default class User {
   static account_create = createAccount;
+  static get_all_users = getAllUsers;
 }
