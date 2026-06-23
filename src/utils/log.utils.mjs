@@ -74,3 +74,17 @@ export class appp {
     console.log(this.get(), chalk.yellow(value) + chalk.greenBright(port));
   }
 }
+
+export class web {
+  static get() {
+    return `${chalk.yellow.bold("web")}\t:`;
+  }
+
+  static default(...args) {
+    console.log(this.get(), chalk.gray(args[0]), ...args.slice(1));
+  }
+
+  static error(...args) {
+    console.log(this.get(), chalk.red(args[0]), ...args.slice(1));
+  }
+}

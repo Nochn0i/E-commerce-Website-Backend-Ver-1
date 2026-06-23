@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
-import { appp } from "./utils/log.utils.mjs";
+import { appp, web } from "./utils/log.utils.mjs";
 
 function loadModules() {
   try {
@@ -27,8 +27,7 @@ async function loadAPIRouter(app, apiRouter) {
 async function finalize(app) {
   try {
     app.get("/", (_, res) => {
-      console.log("[ app ] Server was pinged.");
-      appp.router("Server was pinged.");
+      web.default("Server was pinged.");
       return res.status(200).json({
         "app-message": "Welcome to Express Server",
         "app-health": "healthy",
@@ -37,8 +36,8 @@ async function finalize(app) {
     });
 
     app.use((err, req, res, next) => {
-      appp.error("Error encountered. Err message:", err.message);
-      appp.error("Full Error. ERR:", err);
+      web.error("Error encountered. Err message:", err.message);
+      web.error("Full Error. ERR:", err);
       return res.status(200).json({
         message: err.message || "Internal server error",
         orginalError: process.env.ENV === "development" ? err : "",
