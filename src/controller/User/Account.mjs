@@ -6,9 +6,10 @@ async function register(req, res, next) {
   try {
     const { username, email, password } = req.body;
     const createdUser = await User.account_create(username, email, password);
+    const user_id = createdUser._id;
+    web.default("New user was created. User:", user_id);
 
-    web.default("New user was created. User:", createdUser._id);
-
+    rollBackActions.push(async () => await User.delete_account(user_id));
     return res.status(200).json({
       message: "User account was created successfully.",
       user: createdUser.toObject(),

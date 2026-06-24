@@ -3,6 +3,9 @@ import {
   getAllUsers,
   createBuyer,
   createWallet,
+  deleteAccount,
+  deleteProfile,
+  deleteWallet,
 } from "./User/Account.mjs";
 
 export default class User {
@@ -10,4 +13,7 @@ export default class User {
   static get_all_users = getAllUsers;
   static register_buyer = createBuyer;
   static register_wallet = createWallet;
+  static delete_account = deleteAccount;
+  static delete_profile = deleteProfile;
+  static delete_wallet = deleteWallet;
 }
