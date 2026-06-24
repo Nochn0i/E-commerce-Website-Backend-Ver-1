@@ -1,8 +1,8 @@
-import UserAccount from "../../../models/User/Account.mjs";
-import { BuyerProfile, UserProfile } from "../../../models/User/Profile.mjs";
-import UserWallet from "../../../models/User/Wallet.mjs";
-import { hashPassword } from "../../../utils/bcrypt.utils.mjs";
-import { isEmpty } from "../../../utils/validate.utils.mjs";
+import UserAccount from "../../models/User/Account.mjs";
+import { BuyerProfile, UserProfile } from "../../models/User/Profile.mjs";
+import UserWallet from "../../models/User/Wallet.mjs";
+import { hashPassword } from "../../utils/bcrypt.utils.mjs";
+import { isEmpty } from "../../utils/validate.utils.mjs";
 
 function noUsername() {
   const error = new Error("Username empty.");

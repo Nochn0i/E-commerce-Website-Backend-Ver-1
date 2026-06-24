@@ -1,5 +1,6 @@
-import { web } from "../../utils/log.utils.mjs";
-import User from "../Services/User.mjs";
+import { web } from "../utils/log.utils.mjs";
+import UserServices from "./Services/UserServices.mjs";
+
 class Notify {
   static deletedAccount = (user_id) =>
     web.default("User of User Id:", user_id, "was deleted.");
@@ -13,24 +14,28 @@ async function register(req, res, next) {
   try {
     const { username, email, password } = req.body;
 
-    const createdUser = await User.account_create(username, email, password);
+    const createdUser = await UserServices.account_create(
+      username,
+      email,
+      password,
+    );
     const user_id = createdUser._id;
     web.default("New user was created. User:", user_id);
 
     rollBackActions.push(async () => {
-      await User.delete_account(user_id);
+      await UserServices.delete_account(user_id);
       Notify.deletedAccount(user_id);
     });
 
-    await User.register_buyer(user_id);
+    await UserServices.register_buyer(user_id);
     web.default("New user profile was created for User:", user_id);
 
     rollBackActions.push(async () => {
-      await User.delete_profile(user_id);
+      await UserServices.delete_profile(user_id);
       Notify.deleteProfile(user_id);
     });
 
-    await User.register_wallet(user_id);
+    await UserServices.register_wallet(user_id);
     web.default("New user wallet was created for User:", user_id);
 
     return res.status(200).json({
@@ -54,7 +59,7 @@ async function register(req, res, next) {
 
 async function getAllUsers(_, res, next) {
   try {
-    const users = await User.get_all_users();
+    const users = await UserServices.get_all_users();
     web.default("Fetched All Users.");
     return res.status(200).json({
       message: "All user accounts fetched successfully.",
@@ -66,7 +71,7 @@ async function getAllUsers(_, res, next) {
   }
 }
 
-export default class Account {
+export default class User {
   static register = register;
   static fetchAll = getAllUsers;
 }

@@ -6,9 +6,9 @@ import {
   deleteAccount,
   deleteProfile,
   deleteWallet,
-} from "./User/Account.mjs";
+} from "./Modules.mjs";
 
-export default class User {
+export default class UserServices {
   static account_create = createAccount;
   static get_all_users = getAllUsers;
   static register_buyer = createBuyer;
