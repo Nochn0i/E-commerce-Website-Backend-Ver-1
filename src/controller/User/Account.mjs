@@ -1,21 +1,53 @@
 import { web } from "../../utils/log.utils.mjs";
 import User from "../Services/User.mjs";
+class Notify {
+  static deletedAccount = (user_id) =>
+    web.default("User of User Id:", user_id, "was deleted.");
+
+  static deleteProfile = (user_id) =>
+    web.default("User Profile for user id:", user_id, "was deleted.");
+}
 
 async function register(req, res, next) {
   const rollBackActions = [];
   try {
     const { username, email, password } = req.body;
+
     const createdUser = await User.account_create(username, email, password);
     const user_id = createdUser._id;
     web.default("New user was created. User:", user_id);
 
-    rollBackActions.push(async () => await User.delete_account(user_id));
+    rollBackActions.push(async () => {
+      await User.delete_account(user_id);
+      Notify.deletedAccount(user_id);
+    });
+
+    await User.register_buyer(user_id);
+    web.default("New user profile was created for User:", user_id);
+
+    rollBackActions.push(async () => {
+      await User.delete_profile(user_id);
+      Notify.deleteProfile(user_id);
+    });
+
+    await User.register_wallet(user_id);
+    web.default("New user wallet was created for User:", user_id);
+
     return res.status(200).json({
       message: "User account was created successfully.",
       user: createdUser.toObject(),
     });
   } catch (error) {
     web.error("User account creation failed.");
+
+    for (const func of rollBackActions.reverse()) {
+      try {
+        await func();
+      } catch (rollbackError) {
+        web.error("A rollback action failed to execute:", rollbackError);
+      }
+    }
+
     next(error);
   }
 }

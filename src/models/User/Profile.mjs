@@ -12,7 +12,6 @@ const userProfileSchema = new mongoose.Schema(
       type: String,
       trim: true,
       default: "",
-      minlength: 2,
       maxlength: 100,
     },
     phone_number: {
