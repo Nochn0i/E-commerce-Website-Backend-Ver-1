@@ -47,13 +47,13 @@ export async function createAccount(username, email, password) {
 }
 //#endregion
 
-function noUserId() {
-  const error = new Error("User Id not specified.");
+function noId(name = "User") {
+  const error = new Error(`${name} Id not specified.`);
   error.statusCode = 400;
   throw error;
 }
 
-function userNotFound() {
+function userNotFoundById() {
   const error = new Error("User doesn't exist of this Id.");
   error.statusCode = 404;
   throw error;
@@ -65,20 +65,32 @@ function userProfileAlreadyExists() {
   throw error;
 }
 
+function userProfileNotFoundByUserId() {
+  const error = new Error("User profile doesnt exists for this User Id");
+  error.statusCode = 404;
+  throw error;
+}
+
 function userProfileNotFound() {
   const error = new Error("User profile doesnt exists for this User Id");
   error.statusCode = 404;
   throw error;
 }
 
-function userWalletAlreadyExists() {
+function userWalletAlreadyExistsForUserId() {
   const error = new Error("User wallet already exists for this User Id");
   error.statusCode = 409;
   throw error;
 }
 
-function userWalletNotFound() {
+function userWalletNotFoundByUserId() {
   const error = new Error("User wallet doesn't exists for this User Id");
+  error.statusCode = 404;
+  throw error;
+}
+
+function userWalletNotFound() {
+  const error = new Error("User wallet doesn't exists.");
   error.statusCode = 404;
   throw error;
 }
@@ -87,6 +99,18 @@ async function checkUser(user_id) {
   const uResult = await UserAccount.exists({ _id: user_id });
   const uE = !!uResult;
   return uE;
+}
+
+async function checkUserProfile(profile_id) {
+  const uResult = await UserProfile.exists({ _id: profile_id });
+  const pE = !!uResult;
+  return pE;
+}
+
+async function checkUserWallet(wallet_id) {
+  const uResult = await UserWallet.exists({ _id: wallet_id });
+  const wE = !!uResult;
+  return wE;
 }
 
 async function checkUserAndProfile(user_id) {
@@ -108,11 +132,11 @@ async function checkUserAndWallet(user_id) {
 //#region Create Buyer
 export async function createBuyer(user_id) {
   const isUserId = await isEmpty(user_id);
-  !isUserId && noUserId();
+  !isUserId && noId();
 
   const { uE, pE } = await checkUserAndProfile(user_id);
 
-  !uE && userNotFound();
+  !uE && userNotFoundById();
 
   pE && userProfileAlreadyExists();
 
@@ -123,29 +147,25 @@ export async function createBuyer(user_id) {
 //#region Create Wallet
 export async function createWallet(user_id) {
   const isUserId = await isEmpty(user_id);
-  !isUserId && noUserId();
+  !isUserId && noId();
 
   const { uE, wE } = await checkUserAndWallet(user_id);
 
-  !uE && userNotFound();
-  wE && userWalletAlreadyExists();
+  !uE && userNotFoundById();
+  wE && userWalletAlreadyExistsForUserId();
 
   return await UserWallet.create({ user_id });
 }
 //#endregion
 
-//#region Fetch all users
-export const getAllUsers = async () => await UserAccount.find({});
-//#endregion
-
 //#region Delete Account
 export async function deleteAccount(user_id) {
   const isUserId = await isEmpty(user_id);
-  !isUserId && noUserId();
+  !isUserId && noId();
 
   const uE = await checkUser(user_id);
 
-  !uE && userNotFound();
+  !uE && userNotFoundById();
 
   return await UserAccount.findByIdAndDelete(user_id);
 }
@@ -154,12 +174,12 @@ export async function deleteAccount(user_id) {
 //#region Delete Profile
 export async function deleteProfile(user_id) {
   const isUserId = await isEmpty(user_id);
-  !isUserId && noUserId();
+  !isUserId && noId();
 
   const { uE, pE } = await checkUserAndProfile(user_id);
 
-  !uE && userNotFound();
-  !pE && userProfileNotFound();
+  !uE && userNotFoundById();
+  !pE && userProfileNotFoundByUserId();
 
   return await UserProfile.findOneAndDelete({ user_id });
 }
@@ -168,13 +188,77 @@ export async function deleteProfile(user_id) {
 //#region Delete Wallet
 export async function deleteWallet(user_id) {
   const isUserId = await isEmpty(user_id);
-  !isUserId && noUserId();
+  !isUserId && noId();
 
   const { uE, wE } = await checkUserAndWallet(user_id);
 
-  !uE && userNotFound();
-  !wE && userWalletNotFound();
+  !uE && userNotFoundById();
+  !wE && userWalletNotFoundByUserId();
 
   return await UserWallet.findOneAndDelete({ user_id });
+}
+//#endregion
+
+//#region Fetch all users
+export const getAllUsers = async () => await UserAccount.find({});
+//#endregion
+
+//#region Fetch all user's profiles
+export const getAllUserProfiles = async () =>
+  await UserProfile.find({}).populate("user_id");
+//#endregion
+
+//#region Fetch all user's wallets
+export const getAllUserWallets = async () =>
+  await UserWallet.find({}).populate("user_id");
+//#endregion
+
+//#region Fetch user by id
+export async function getUserById(user_id) {
+  const isUserId = await isEmpty(user_id);
+  !isUserId && noId();
+  const uE = await checkUser(user_id);
+  !uE && userNotFoundById();
+  return await UserAccount.findById(user_id);
+}
+//#endregion
+
+//#region Fetch user profile by id
+export async function getUserProfileById(profile_id) {
+  const isUserId = await isEmpty(profile_id);
+  !isUserId && noId("Profile");
+  const uE = await checkUserProfile(profile_id);
+  !uE && userProfileNotFound();
+  return await UserProfile.findById(profile_id).populate("user_id");
+}
+//#region Fetch user profile by User id
+export async function getUserProfileByUserId(user_id) {
+  const isUserId = await isEmpty(user_id);
+  !isUserId && noId();
+  const { uE, pE } = await checkUserAndProfile(user_id);
+  !uE && userNotFoundById();
+  !pE && userProfileNotFoundByUserId();
+  return await UserProfile.findOne({ user_id }).populate("user_id");
+}
+//#endregion
+
+//#region Fetch user wallet by id
+export async function getUserWalletById(wallet_id) {
+  const isUserId = await isEmpty(wallet_id);
+  !isUserId && noId("Wallet");
+  const uE = await checkUserWallet(wallet_id);
+  !uE && userWalletNotFound();
+  return await UserWallet.findById(wallet_id).populate("user_id");
+}
+//#endregion
+
+//#region Fetch user wallet by User id
+export async function getUserWalletByUserId(user_id) {
+  const isUserId = await isEmpty(user_id);
+  !isUserId && noId();
+  const { uE, wE } = await checkUserAndWallet(user_id);
+  !uE && userNotFoundById();
+  !wE && userProfileNotFoundByUserId();
+  return await UserWallet.findOne({ user_id }).populate("user_id");
 }
 //#endregion
