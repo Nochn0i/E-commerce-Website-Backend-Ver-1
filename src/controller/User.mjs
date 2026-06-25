@@ -5,14 +5,29 @@ import UserServices from "./Services/UserServices.mjs";
 
 class Notify {
   static deletedAccount = (user_id) =>
-    web.default("User of User Id:", user_id, "was deleted.");
+    web.default(
+      "User of User Id:",
+      new mongoose.Types.ObjectId(user_id),
+      "was deleted.",
+    );
 
   static deleteProfile = (user_id) =>
-    web.default("User Profile for user id:", user_id, "was deleted.");
+    web.default(
+      "User Profile for user id:",
+      new mongoose.Types.ObjectId(user_id),
+      "was deleted.",
+    );
+
+  static deleteWallet = (user_id) =>
+    web.default(
+      "User Wallet for user id:",
+      new mongoose.Types.ObjectId(user_id),
+      "was deleted.",
+    );
 }
 
 //#region Register User (Account, Profile & Wallet)
-async function register(req, res, next) {
+async function createUser(req, res, next) {
   const rollBackActions = [];
   try {
     const { username, email, password } = req.body;
@@ -22,8 +37,11 @@ async function register(req, res, next) {
       email,
       password,
     );
-    const user_id = createdUser._id;
-    web.default("New user was created. User:", user_id);
+    const user_id = createdUser._id.toString();
+    web.default(
+      "New user was created. User:",
+      new mongoose.Types.ObjectId(user_id),
+    );
 
     rollBackActions.push(async () => {
       await UserServices.delete_account(user_id);
@@ -31,7 +49,10 @@ async function register(req, res, next) {
     });
 
     await UserServices.register_buyer(user_id);
-    web.default("New user profile was created for User:", user_id);
+    web.default(
+      "New user profile was created for User:",
+      new mongoose.Types.ObjectId(user_id),
+    );
 
     rollBackActions.push(async () => {
       await UserServices.delete_profile(user_id);
@@ -39,7 +60,10 @@ async function register(req, res, next) {
     });
 
     await UserServices.register_wallet(user_id);
-    web.default("New user wallet was created for User:", user_id);
+    web.default(
+      "New user wallet was created for User:",
+      new mongoose.Types.ObjectId(user_id),
+    );
 
     return res.status(200).json({
       message: "User account was created successfully.",
@@ -166,7 +190,7 @@ async function getUserProfileById(req, res, next) {
 //#region GET User profile by User id
 async function getUserProfileByUserId(req, res, next) {
   try {
-    const { user_id } = req.body;
+    const { id: user_id } = req.params;
     const isId = await isEmpty(user_id);
 
     !isId && noIdError();
@@ -214,7 +238,7 @@ async function getUserWalletById(req, res, next) {
 //#region GET User wallet by User id
 async function getUserWalletByUserId(req, res, next) {
   try {
-    const { user_id } = req.body;
+    const { id: user_id } = req.params;
     const isId = await isEmpty(user_id);
 
     !isId && noIdError();
@@ -234,8 +258,36 @@ async function getUserWalletByUserId(req, res, next) {
   }
 }
 //#endregion
+
+//#region Delete User By Id
+async function deleteUserById(req, res, next) {
+  const { id } = req.params;
+  try {
+    const isId = await isEmpty(id);
+
+    !isId && noIdError(id);
+
+    await UserServices.delete_wallet(id);
+    Notify.deleteWallet(id);
+
+    await UserServices.delete_profile(id);
+    Notify.deleteProfile(id);
+
+    await UserServices.delete_account(id);
+    Notify.deletedAccount(id);
+
+    web.default("User full account deletion completed.");
+
+    return res.status(200).json({
+      message: "User account was deleted successfully.",
+    });
+  } catch (error) {
+    web.error("User full account deletion failed. User Id:", id);
+    next(error);
+  }
+}
 export default class User {
-  static register = register;
+  static register = createUser;
 
   static fetch_user_by_id = getUserById;
   static fetch_user_profile_by_id = getUserProfileById;
@@ -246,4 +298,6 @@ export default class User {
   static fetch_all_users = getAllUsers;
   static fetch_all_user_profiles = getAllUserProfiles;
   static fetch_all_user_wallets = getAllUserWallets;
+
+  static delete_user_by_id = deleteUserById;
 }
