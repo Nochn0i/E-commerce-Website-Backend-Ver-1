@@ -234,3 +234,38 @@ export async function getUserWalletByUserId(user_id) {
   return await UserWallet.findOne({ user_id }).populate("user_id");
 }
 //#endregion
+
+//#region Ban User By Id
+export async function banUserById(user_id, description) {
+  const isUserId = await isEmpty(user_id);
+  !isUserId && noId();
+  const uE = await checkUser(user_id);
+  !uE && userNotFoundById(user_id);
+  return await UserAccount.findByIdAndUpdate(
+    user_id,
+    {
+      $set: {
+        isBanned: true,
+        banReason: description || "No reason provided",
+      },
+    },
+    { new: true },
+  );
+}
+//#endregion
+
+//#region Unban User By Id
+export async function unBanUserById(user_id) {
+  const isUserId = await isEmpty(user_id);
+  !isUserId && noId();
+  const uE = await checkUser(user_id);
+  !uE && userNotFoundById();
+  return await UserAccount.findByIdAndUpdate(
+    user_id,
+    {
+      $set: { isBanned: false, banReason: null },
+    },
+    { new: true },
+  );
+}
+//#endregion

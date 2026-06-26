@@ -202,10 +202,58 @@ async function deleteUserById(req, res, next) {
       message: "User account was deleted successfully.",
     });
   } catch (error) {
-    web.error("User full account deletion failed. User Id:", id);
+    web.error(
+      "User full account deletion failed. User Id:",
+      new mongoose.Types.ObjectId(id),
+    );
     next(error);
   }
 }
+//#endregion
+
+function invalidActionError(action, action_array) {
+  if (!action_array.includes(action.toLowerCase())) {
+    const error = new Error("Invalid action was specified. Error.");
+    error.statusCode = 400;
+    throw error;
+  }
+}
+
+//#region Ban and Unban User By Id
+async function banUnbanUserById(req, res, next) {
+  const { id } = req.params;
+  try {
+    const isId = await isEmpty(id);
+
+    !isId && noIdError(id);
+
+    const { action, description } = req.body;
+    await invalidActionError(action, ["ban", "unban"]);
+    switch (action) {
+      case "ban":
+        await UserServices.ban_user_by_id(id, description);
+        break;
+      case "unban":
+        await UserServices.unban_user_by_id(id);
+        break;
+    }
+    web.default(
+      `User was ${action} of User Id:`,
+      new mongoose.Types.ObjectId(id),
+    );
+    return res.status(200).json({
+      message: `User was ${action}`,
+    });
+  } catch (error) {
+    web.error(
+      "User Ban Unban action failed. User Id:",
+      new mongoose.Types.ObjectId(id),
+    );
+    next(error);
+  }
+}
+//#endregion
+
 export default class User {
   static register = createUser;
 
@@ -216,4 +264,6 @@ export default class User {
   static fetch_all_users = getAllUsers;
 
   static delete_user_by_id = deleteUserById;
+
+  static ban_unban_user_by_id = banUnbanUserById;
 }

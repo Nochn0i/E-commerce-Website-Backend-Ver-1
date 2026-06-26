@@ -13,6 +13,9 @@ import {
   deleteAccount,
   deleteProfile,
   deleteWallet,
+  // -------------------
+  banUserById,
+  unBanUserById,
 } from "./Modules.mjs";
 
 export default class UserServices {
@@ -30,4 +33,7 @@ export default class UserServices {
   static delete_account = deleteAccount;
   static delete_profile = deleteProfile;
   static delete_wallet = deleteWallet;
+
+  static ban_user_by_id = banUserById;
+  static unban_user_by_id = unBanUserById;
 }
