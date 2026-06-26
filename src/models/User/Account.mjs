@@ -28,6 +28,14 @@ const userAccountSchema = new mongoose.Schema(
       default: "user",
       select: false,
     },
+    isBanned: {
+      type: Boolean,
+      default: false,
+    },
+    banReason: {
+      type: String,
+      default: null,
+    },
   },
   {
     timestamps: true,

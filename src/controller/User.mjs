@@ -101,38 +101,6 @@ async function getAllUsers(_, res, next) {
 }
 //#endregion
 
-//#region GET User Profiles
-async function getAllUserProfiles(_, res, next) {
-  try {
-    const users = await UserServices.get_all_user_profiles();
-    web.default("Fetched All User Profiles.");
-    return res.status(200).json({
-      message: "All user profiles fetched successfully.",
-      users,
-    });
-  } catch (error) {
-    web.error("Users profiles fetch failed.");
-    next(error);
-  }
-}
-//#endregion
-
-//#region GET User Wallets
-async function getAllUserWallets(_, res, next) {
-  try {
-    const users = await UserServices.get_all_user_wallets();
-    web.default("Fetched All User Wallets.");
-    return res.status(200).json({
-      message: "All user wallets fetched successfully.",
-      users,
-    });
-  } catch (error) {
-    web.error("Users wallets fetch failed.");
-    next(error);
-  }
-}
-//#endregion
-
 function noIdError(name = "User") {
   const error = new Error(`No ${name} Id Specified`);
   error.statusCode = 400;
@@ -163,30 +131,6 @@ async function getUserById(req, res, next) {
 }
 //#endregion
 
-//#region GET User profile by id
-async function getUserProfileById(req, res, next) {
-  try {
-    const { id } = req.params;
-    const isId = await isEmpty(id);
-
-    !isId && noIdError("Profile");
-
-    const userProfile = await UserServices.get_user_profile_by_id(id);
-    web.default(
-      "Fetched User Profile of Profile Id:",
-      new mongoose.Types.ObjectId(id),
-    );
-    return res.status(200).json({
-      message: "User profile fetched successfully.",
-      userProfile,
-    });
-  } catch (error) {
-    web.error("User profile fetch failed");
-    next(error);
-  }
-}
-//#endregion
-
 //#region GET User profile by User id
 async function getUserProfileByUserId(req, res, next) {
   try {
@@ -206,30 +150,6 @@ async function getUserProfileByUserId(req, res, next) {
     });
   } catch (error) {
     web.error("User profile fetch failed");
-    next(error);
-  }
-}
-//#endregion
-
-//#region GET User wallet by id
-async function getUserWalletById(req, res, next) {
-  try {
-    const { id } = req.params;
-    const isId = await isEmpty(id);
-
-    !isId && noIdError("Wallet");
-
-    const userProfile = await UserServices.get_user_wallet_by_id(id);
-    web.default(
-      "Fetched User Wallet of Wallet Id:",
-      new mongoose.Types.ObjectId(id),
-    );
-    return res.status(200).json({
-      message: "User wallet fetched successfully.",
-      userProfile,
-    });
-  } catch (error) {
-    web.error("User wallet fetch failed");
     next(error);
   }
 }
@@ -290,14 +210,10 @@ export default class User {
   static register = createUser;
 
   static fetch_user_by_id = getUserById;
-  static fetch_user_profile_by_id = getUserProfileById;
-  static fetch_user_wallet_by_id = getUserWalletById;
   static fetch_user_profile_by_user_id = getUserProfileByUserId;
   static fetch_user_wallet_by_user_id = getUserWalletByUserId;
 
   static fetch_all_users = getAllUsers;
-  static fetch_all_user_profiles = getAllUserProfiles;
-  static fetch_all_user_wallets = getAllUserWallets;
 
   static delete_user_by_id = deleteUserById;
 }

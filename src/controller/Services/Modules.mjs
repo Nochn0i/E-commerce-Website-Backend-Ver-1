@@ -203,16 +203,6 @@ export async function deleteWallet(user_id) {
 export const getAllUsers = async () => await UserAccount.find({});
 //#endregion
 
-//#region Fetch all user's profiles
-export const getAllUserProfiles = async () =>
-  await UserProfile.find({}).populate("user_id");
-//#endregion
-
-//#region Fetch all user's wallets
-export const getAllUserWallets = async () =>
-  await UserWallet.find({}).populate("user_id");
-//#endregion
-
 //#region Fetch user by id
 export async function getUserById(user_id) {
   const isUserId = await isEmpty(user_id);
@@ -223,14 +213,6 @@ export async function getUserById(user_id) {
 }
 //#endregion
 
-//#region Fetch user profile by id
-export async function getUserProfileById(profile_id) {
-  const isUserId = await isEmpty(profile_id);
-  !isUserId && noId("Profile");
-  const uE = await checkUserProfile(profile_id);
-  !uE && userProfileNotFound();
-  return await UserProfile.findById(profile_id).populate("user_id");
-}
 //#region Fetch user profile by User id
 export async function getUserProfileByUserId(user_id) {
   const isUserId = await isEmpty(user_id);
@@ -239,16 +221,6 @@ export async function getUserProfileByUserId(user_id) {
   !uE && userNotFoundById();
   !pE && userProfileNotFoundByUserId();
   return await UserProfile.findOne({ user_id }).populate("user_id");
-}
-//#endregion
-
-//#region Fetch user wallet by id
-export async function getUserWalletById(wallet_id) {
-  const isUserId = await isEmpty(wallet_id);
-  !isUserId && noId("Wallet");
-  const uE = await checkUserWallet(wallet_id);
-  !uE && userWalletNotFound();
-  return await UserWallet.findById(wallet_id).populate("user_id");
 }
 //#endregion
 
